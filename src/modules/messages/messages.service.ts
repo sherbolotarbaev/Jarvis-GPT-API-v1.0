@@ -73,7 +73,7 @@ export class MessagesService {
 
     try {
       let stream: Stream<ChatCompletionChunk>;
-      if (!files && files.length === 0) {
+      if (!files || files.length === 0) {
         stream = await this.chatGptService.chatGptStreamRequest(
           text,
           `Imagine you're an AI functioning as my personal Jarvis, your name is Jarvis!, and you can call me Sher!, assisting me in various tasks. Answer very shortly and clear, my today's topic is ${chat.title}`,
