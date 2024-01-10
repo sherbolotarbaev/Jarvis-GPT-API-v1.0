@@ -96,13 +96,13 @@ export class ChatGptService {
 
   async synthesizeSpeech(userId: number, text: string): Promise<string> {
     try {
-      const ttsResponse = await this.openai.audio.speech.create({
+      const response = await this.openai.audio.speech.create({
         input: text,
         model: 'tts-1-hd',
         voice: 'alloy',
       });
 
-      const arrayBuffer = await ttsResponse.arrayBuffer();
+      const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = Buffer.from(arrayBuffer);
 
       const path = await this.supabaseService.uploadAudio(userId, audioBuffer);

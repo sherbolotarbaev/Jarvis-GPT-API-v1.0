@@ -1,4 +1,4 @@
-export * from './speech-to-text/speech-to-text.module'
+export * from './speech/speech.module'
 export * from './chat-gpt/chat-gpt.module'
 export * from './auth/auth.module'
 export * from './jwt/jwt.module'

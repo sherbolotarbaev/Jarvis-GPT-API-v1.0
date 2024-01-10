@@ -26,24 +26,8 @@ export class MessagesService {
 
     const user = await this.usersService.findById(userId);
     const chat = await this.findChatByIdAndUserId(chatId, user.id);
-    const requests = await this.prisma.requests.findFirst({
-      where: { userId: user.id, chatId: chat.id },
-    });
-
-    await this.updateRequestTries(
-      user.id,
-      user.role,
-      chat.id,
-      '/messages/:chatId',
-      'SINGLE',
-      requests,
-    );
 
     const lang: Languages = chat.language as Languages;
-
-    if (user.role === 'USER' && requests && requests.tries === 0) {
-      throw new ForbiddenException('Limit of 3 requests has been exceeded');
-    }
 
     const allMessages = [
       ...chat.messages,
@@ -86,18 +70,6 @@ export class MessagesService {
 
     const user = await this.usersService.findById(userId);
     const chat = await this.findChatByIdAndUserId(chatId, user.id);
-    const requests = await this.prisma.requests.findFirst({
-      where: { userId: user.id, chatId: chat.id },
-    });
-
-    await this.updateRequestTries(
-      user.id,
-      user.role,
-      chat.id,
-      '/messages/:chatId/stream',
-      'STREAM',
-      requests,
-    );
 
     try {
       let stream: Stream<ChatCompletionChunk>;
@@ -174,61 +146,6 @@ export class MessagesService {
     }
 
     return urls;
-  }
-
-  private async updateRequestTries(
-    userId: number,
-    userRole: UserRole,
-    chatId: number,
-    route: string,
-    type: RequestType,
-    requests: any,
-  ) {
-    const currentDate = new Date();
-    const lastAttemptDate = requests ? new Date(requests.lastAttempt) : null;
-    // const yesterdayDate = new Date(new Date().setDate(new Date().getDate() - 1));
-
-    if (!requests) {
-      await this.prisma.requests.create({
-        data: {
-          userId,
-          chatId,
-          type,
-          route,
-          lastAttempt: currentDate,
-        },
-      });
-    } else if (
-      userRole === 'USER' &&
-      this.isSameDay(currentDate, lastAttemptDate)
-    ) {
-      if (requests.tries > 0) {
-        await this.prisma.requests.update({
-          where: { userId, chatId: chatId, type, route },
-          data: { tries: requests.tries - 1, lastAttempt: currentDate },
-        });
-      } else {
-        throw new ForbiddenException(
-          'Limit of attempts for today has been exceeded, please try again later',
-        );
-      }
-    } else {
-      await this.prisma.requests.update({
-        where: { userId, chatId: chatId, type, route },
-        data: { tries: 3, lastAttempt: currentDate },
-      });
-    }
-  }
-
-  private isSameDay(date1: Date | null, date2: Date | null): boolean {
-    if (!date1 || !date2) {
-      return false;
-    }
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
   }
 
   private async saveMessages(

@@ -58,6 +58,21 @@ export class UsersService {
                 ]
               : [],
           },
+          {
+            role: 'SUPERADMIN',
+            AND: query
+              ? [
+                  {
+                    OR: [
+                      { firstName: { contains: query, mode: 'insensitive' } },
+                      { lastName: { contains: query, mode: 'insensitive' } },
+                      { email: { contains: query, mode: 'insensitive' } },
+                      { phone: { contains: query, mode: 'insensitive' } },
+                    ],
+                  },
+                ]
+              : [],
+          },
         ],
       },
       include: {
