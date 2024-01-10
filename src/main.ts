@@ -10,7 +10,7 @@ async function start() {
 
   // Set CORS options
   const corsOptions: CorsOptions = {
-    origin: [process.env.FRONTEND_BASE_URL, 'http://localhost:3000'],
+    origin: process.env.FRONTEND_BASE_URL,
     credentials: true,
     allowedHeaders: [
       'Origin',
